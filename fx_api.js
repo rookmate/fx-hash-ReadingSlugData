@@ -25,7 +25,7 @@ let _output = {
   amount: 1,
 }
 
-async function tokenListing(collectionSlug, tokenID) {
+async function tokenListing(tokenID) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
   const graphQLClient = new GraphQLClient(endpoint)
