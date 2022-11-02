@@ -74,7 +74,7 @@ async function tokenListing(tokenID) {
   console.log(_output);
 }
 
-async function collectionFloor(collectionSlug) {
+async function collectionListingsWithFloor(collectionSlug) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
   const graphQLClient = new GraphQLClient(endpoint)
@@ -87,6 +87,21 @@ async function collectionFloor(collectionSlug) {
         name
         marketStats {
           floor
+        }
+        activeListedObjkts {
+          id
+          name
+          slug
+          displayUri
+          rarity
+          activeListing {
+            amount
+            price
+          }
+          owner {
+            name
+          }
+          features
         }
       }
     }
@@ -109,7 +124,8 @@ async function collectionFloor(collectionSlug) {
   console.log(_output);
 }
 
-collectionFloor(collection).catch((error) => console.error(error));
+
+collectionListings(collection).catch((error) => console.error(error));
 tokenListing(tokenID).catch((error) => console.error(error));
 
 // Query tested here: https://studio.apollographql.com/sandbox/explorer?endpoint=https%3A%2F%2Fapi.fxhash.xyz%2Fgraphql&explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4QEcYIE4CeABAOLL4CGKAlgG4IAqEA1sgBQAkAzgDYwDm6IgGUUeakn4BKIsAA6SIkX7k8VOoxbteAodz7TZCpUuphjJnfwtKkFRDaJwKeVilFUuRxSaUAzHggIPEcAX0cKKBp6ABlqLhQEMAB5ACMAK2YUL3kfXzNHW3sEQqIrUrB4gAceCgIAVXFStXEUAlLI6IQ4hIl%2Bb19fKvEoErzB%2BwgYVFLw8aUIAHckfAHBood5ojn1vwQqGDwELjCLOdCQABoQWhdqClSeY4wQXKU5EHKMIg%2BVJABaAAeBAAXv8wBQuP9oLAeCgPpcFBdQkA
