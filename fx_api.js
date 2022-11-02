@@ -25,7 +25,7 @@ let _output = {
   amount: 1,
 }
 
-async function tokenListing(tokenID) {
+async function tokenListing(collectionSlug, tokenID) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
   const graphQLClient = new GraphQLClient(endpoint)
@@ -50,6 +50,7 @@ async function tokenListing(tokenID) {
   `
 
   const variables = {
+    slug: collectionSlug,
     objktId: tokenID,
   }
 
@@ -74,7 +75,7 @@ async function tokenListing(tokenID) {
   console.log(_output);
 }
 
-async function collectionListingsWithFloor(collectionSlug) {
+async function collectionActiveListings(collectionSlug) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
   const graphQLClient = new GraphQLClient(endpoint)
@@ -124,8 +125,102 @@ async function collectionListingsWithFloor(collectionSlug) {
   console.log(_output);
 }
 
+async function trackCollection(collectionSlug) {
+  const endpoint = 'https://api.fxhash.xyz/graphql'
 
-collectionListings(collection).catch((error) => console.error(error));
-tokenListing(tokenID).catch((error) => console.error(error));
+  const graphQLClient = new GraphQLClient(endpoint)
 
-// Query tested here: https://studio.apollographql.com/sandbox/explorer?endpoint=https%3A%2F%2Fapi.fxhash.xyz%2Fgraphql&explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4QEcYIE4CeABAOLL4CGKAlgG4IAqEA1sgBQAkAzgDYwDm6IgGUUeakn4BKIsAA6SIkX7k8VOoxbteAodz7TZCpUuphjJnfwtKkFRDaJwKeVilFUuRxSaUAzHggIPEcAX0cKKBp6ABlqLhQEMAB5ACMAK2YUL3kfXzNHW3sEQqIrUrB4gAceCgIAVXFStXEUAlLI6IQ4hIl%2Bb19fKvEoErzB%2BwgYVFLw8aUIAHckfAHBood5ojn1vwQqGDwELjCLOdCQABoQWhdqClSeY4wQXKU5EHKMIg%2BVJABaAAeBAAXv8wBQuP9oLAeCgPpcFBdQkA
+  const collectionQuery = gql`
+    query GenerativeToken($slug: String) {
+      generativeToken(slug: $slug) {
+        name
+        slug
+        id
+        actions {
+          id
+          issuer {
+            id
+            name
+          }
+          type
+          createdAt
+          numericValue
+          objkt {
+            id
+            slug
+            name
+            owner {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  `
+// Latest action is actions[0]
+// type tells what happened:
+//      MINTED_FROM
+//      LISTING_V2
+//      LISTING_V2_CANCELLED
+//      OFFER_ACCEPTED
+//      UPDATE_PRICING
+
+  const variables = {
+    slug: collectionSlug,
+  }
+
+  const slugData = await graphQLClient.request(collectionQuery, variables)
+  console.log(JSON.stringify(slugData, undefined, 2));
+}
+
+async function trackToken(collectionSlug, tokenID) {
+  const endpoint = 'https://api.fxhash.xyz/graphql'
+
+  const graphQLClient = new GraphQLClient(endpoint)
+
+  const collectionQuery = gql`
+    query Objkt($objktId: Float) {
+      objkt(id: $objktId) {
+        id
+        name
+        slug
+        actions {
+          id
+          type
+          numericValue
+          createdAt
+          issuer {
+            name
+            id
+          }
+          target {
+            id
+            name
+          }
+        }
+      }
+    }
+  `
+// Latest action is actions[0]
+// type tells what happened:
+//      MINTED_FROM
+//      LISTING_V2
+//      LISTING_V2_CANCELLED
+//      OFFER_ACCEPTED
+//      UPDATE_PRICING
+
+  const variables = {
+    slug: collectionSlug,
+    objktId: tokenID,
+  }
+
+  const slugData = await graphQLClient.request(collectionQuery, variables)
+  console.log(JSON.stringify(slugData, undefined, 2));
+}
+
+//collectionActiveListings(collection).catch((error) => console.error(error));
+//tokenListing(collection, tokenID).catch((error) => console.error(error));
+//trackCollection(collection).catch((error) => console.error(error));
+//trackToken(collection, tokenID).catch((error) => console.error(error));
+
