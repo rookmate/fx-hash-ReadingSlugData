@@ -25,6 +25,8 @@ let _output = {
   amount: 1,
 }
 
+// gets the active listing on a token as well as "all" the token details
+// with traits included
 async function tokenListing(tokenID) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
@@ -75,6 +77,7 @@ async function tokenListing(tokenID) {
   console.log(_output);
 }
 
+// gets all active listings for a collection
 async function collectionActiveListings(collectionSlug) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
@@ -125,6 +128,12 @@ async function collectionActiveListings(collectionSlug) {
   console.log(_output);
 }
 
+// tracks all activity on a collection:
+// MINTED_FROM,
+// LISTING_V2,
+// LISTING_V2_CANCELLED,
+// OFFER_ACCEPTED,
+// UPDATE_PRICING
 async function trackCollection(collectionSlug) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
@@ -174,6 +183,12 @@ async function trackCollection(collectionSlug) {
   console.log(JSON.stringify(slugData, undefined, 2));
 }
 
+// tracks all activity on a token:
+// MINTED_FROM,
+// LISTING_V2,
+// LISTING_V2_CANCELLED,
+// OFFER_ACCEPTED,
+// UPDATE_PRICING
 async function trackToken(collectionSlug, tokenID) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
