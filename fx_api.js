@@ -234,6 +234,51 @@ async function trackToken(collectionSlug, tokenID) {
   console.log(JSON.stringify(slugData, undefined, 2));
 }
 
+// Default query behavior is different from all the above.
+// Array of tokens is listed chronologically so the last item of the array is
+// the latest. To easily parse the data, I have flipped the array
+async function getAllLatestEvents() {
+  const endpoint = 'https://api.fxhash.xyz/graphql'
+
+  const graphQLClient = new GraphQLClient(endpoint)
+
+  const collectionQuery = gql`
+    query GenerativeTokens {
+      generativeTokens {
+        name
+        slug
+        id
+        actions {
+          id
+          issuer {
+            id
+            name
+          }
+          type
+          createdAt
+          numericValue
+          objkt {
+            id
+            slug
+            name
+            owner {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  `
+  const variables = {
+  }
+
+  const chronoData = await graphQLClient.request(collectionQuery, variables)
+  const slugData = chronoData.generativeTokens.reverse();
+  console.log(JSON.stringify(slugData, undefined, 2));
+}
+
+getAllLatestEvents().catch((error) => console.error(error));
 //collectionActiveListings(collection).catch((error) => console.error(error));
 //tokenListing(collection, tokenID).catch((error) => console.error(error));
 //trackCollection(collection).catch((error) => console.error(error));
