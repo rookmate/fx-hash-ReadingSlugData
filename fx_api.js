@@ -261,10 +261,16 @@ async function getAllLatestEvents() {
             id
             slug
             name
+            displayUri
+            activeListing {
+              price
+            }
+            rarity
             owner {
               id
               name
             }
+            features
           }
         }
       }
