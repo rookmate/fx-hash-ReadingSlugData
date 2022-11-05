@@ -27,7 +27,7 @@ let _output = {
 
 // gets the active listing on a token as well as "all" the token details
 // with traits included
-async function tokenListing(tokenID) {
+async function tokenListing(collectionSlug, tokenID) {
   const endpoint = 'https://api.fxhash.xyz/graphql'
 
   const graphQLClient = new GraphQLClient(endpoint)
@@ -280,7 +280,7 @@ async function getAllLatestEvents() {
 
 getAllLatestEvents().catch((error) => console.error(error));
 //collectionActiveListings(collection).catch((error) => console.error(error));
-//tokenListing(collection, tokenID).catch((error) => console.error(error));
+tokenListing(collection, tokenID).catch((error) => console.error(error));
 //trackCollection(collection).catch((error) => console.error(error));
 //trackToken(collection, tokenID).catch((error) => console.error(error));
 
