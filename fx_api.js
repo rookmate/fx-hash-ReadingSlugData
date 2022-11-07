@@ -67,10 +67,6 @@ async function getAllLatestEvents() {
               price
             }
             rarity
-            owner {
-              id
-              name
-            }
             features
           }
         }
@@ -98,6 +94,7 @@ async function getAllLatestEvents() {
     if (RECENTLY_SEEN[slugData.generativeTokens[i].slug] == slugData.generativeTokens[i].actions[0].id) {
       continue;
     } else {
+      //console.log(JSON.stringify(slugData.generativeTokens[i], undefined, 2));
       RECENTLY_SEEN[slugData.generativeTokens[i].slug] = slugData.generativeTokens[i].actions[0].id;
       let event = formattedOutput;
       // Fill generic data
@@ -105,26 +102,40 @@ async function getAllLatestEvents() {
       event.collectionSlug = slugData.generativeTokens[i].slug;
       event.collectionName = slugData.generativeTokens[i].name;
       event.txHash = slugData.generativeTokens[i].actions[0].opHash;
-      // Fill from and to name and addresses
+      event.type = slugData.generativeTokens[i].actions[0].type;
       event.fromName = slugData.generativeTokens[i].actions[0].issuer.name;
       event.fromAddress = slugData.generativeTokens[i].actions[0].issuer.id;
+      event.price = Number.parseFloat(slugData.generativeTokens[i].actions[0].numericValue / (10 ** 6)).toFixed(3);
       if (slugData.generativeTokens[i].actions[0].target != null) {
         event.toName = slugData.generativeTokens[i].actions[0].target.name;
         event.toAddress = slugData.generativeTokens[i].actions[0].target.id;
       }
 
-      // If collection mint
-      event.imageUrl = `${gateway}${slugData.generativeTokens[i].displayUri.replace("ipfs://", "")}`;
-      event.permalink = `${collectionPermalink}${event.collectionSlug}`;
-      event.type = slugData.generativeTokens[i].actions[0].type;
-      event.amount = slugData.generativeTokens[i].supply;
-      event.price = slugData.generativeTokens[i].actions[0].numericValue;
+      const token = slugData.generativeTokens[i].actions[0].objkt;
+      if (token == null) {
+        // If collection mint
+        event.imageUrl = `${gateway}${slugData.generativeTokens[i].displayUri.replace("ipfs://", "")}`;
+        event.permalink = `${collectionPermalink}${event.collectionSlug}`;
+        event.amount = slugData.generativeTokens[i].supply;
+      } else {
+        // If Object exists
+        event.tokenId = token.id;
+        event.imageUrl = `${gateway}${token.displayUri.replace("ipfs://", "")}`;
+        event.permalink = `${tokenPermalink}${token.slug}`;
+        event.rarity = token.rarity;
+        event.traits = token.features;
+        // If there is an active listing, update price math
+        if (token.activeListing != null) {
+          event.price = Number.parseFloat(token.activeListing.price / (10 ** 6)).toFixed(3);
+        }
+      }
 
-      console.log(JSON.stringify(slugData.generativeTokens[i], undefined, 2));
-      console.log(event);
-      break;
+      //console.log(event);
+      eventsToEvaluate.push(event);
     }
   }
+
+  console.log(eventsToEvaluate);
 }
 
 getAllLatestEvents().catch((error) => console.error(error));
