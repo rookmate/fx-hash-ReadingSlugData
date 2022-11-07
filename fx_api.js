@@ -1,24 +1,24 @@
 const { GraphQLClient, gql } = require('graphql-request');
 
-let formattedOutput = {
+const formattedOutput = {
   id: 0,
-  price: 0.0,
+  collectionName: null,
+  collectionSlug: null,
+  price: null,
   symbol: "XTZ",
-  imageUrl: "",
-  permalink: "",
-  collectionName: "",
-  tokenId: 0,
-  collectionSlug: "",
-  rarity: 0,
+  imageUrl: null,
+  permalink: null,
+  tokenId: null,
+  rarity: null,
   traits: [],
-  contractAddress: "",
+  contractAddress: null,
   site: "fx(hash)",
-  fromName: "",
-  fromAddress: "",
-  toName: "",
-  toAddress: "",
-  txHash: "",
-  type: "listing",
+  fromName: null,
+  fromAddress: null,
+  toName: null,
+  toAddress: null,
+  txHash: null,
+  type: null,
   isPrivate: false,
   amount: 1,
 };
@@ -30,6 +30,9 @@ var eventsToEvaluate = [];
 
 async function getAllLatestEvents() {
   const endpoint = 'https://api.fxhash.xyz/graphql';
+  const gateway = "https://gateway.fxhash.xyz/ipfs/";
+  const collectionPermalink = "https://www.fxhash.xyz/generative/slug/";
+  const tokenPermalink = "https://www.fxhash.xyz/gentk/slug/";
 
   const graphQLClient = new GraphQLClient(endpoint);
 
@@ -39,6 +42,8 @@ async function getAllLatestEvents() {
         name
         slug
         id
+        displayUri
+        supply
         actions(take: $take, filters: $filters) {
           id
           issuer {
@@ -52,6 +57,7 @@ async function getAllLatestEvents() {
           type
           createdAt
           numericValue
+          opHash
           objkt {
             id
             slug
@@ -93,6 +99,30 @@ async function getAllLatestEvents() {
       continue;
     } else {
       RECENTLY_SEEN[slugData.generativeTokens[i].slug] = slugData.generativeTokens[i].actions[0].id;
+      let event = formattedOutput;
+      // Fill generic data
+      event.id = slugData.generativeTokens[i].id;
+      event.collectionSlug = slugData.generativeTokens[i].slug;
+      event.collectionName = slugData.generativeTokens[i].name;
+      event.txHash = slugData.generativeTokens[i].actions[0].opHash;
+      // Fill from and to name and addresses
+      event.fromName = slugData.generativeTokens[i].actions[0].issuer.name;
+      event.fromAddress = slugData.generativeTokens[i].actions[0].issuer.id;
+      if (slugData.generativeTokens[i].actions[0].target != null) {
+        event.toName = slugData.generativeTokens[i].actions[0].target.name;
+        event.toAddress = slugData.generativeTokens[i].actions[0].target.id;
+      }
+
+      // If collection mint
+      event.imageUrl = `${gateway}${slugData.generativeTokens[i].displayUri.replace("ipfs://", "")}`;
+      event.permalink = `${collectionPermalink}${event.collectionSlug}`;
+      event.type = slugData.generativeTokens[i].actions[0].type;
+      event.amount = slugData.generativeTokens[i].supply;
+      event.price = slugData.generativeTokens[i].actions[0].numericValue;
+
+      console.log(JSON.stringify(slugData.generativeTokens[i], undefined, 2));
+      console.log(event);
+      break;
     }
   }
 }
