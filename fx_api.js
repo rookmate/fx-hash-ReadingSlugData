@@ -87,11 +87,14 @@ async function getAllLatestEvents() {
   const slugData = await graphQLClient.request(collectionQuery, variables);
   //console.log(JSON.stringify(slugData, undefined, 2));
 
-
-
-  const chronoData = await graphQLClient.request(collectionQuery, variables)
-  const slugData = chronoData.generativeTokens.reverse();
-  console.log(JSON.stringify(slugData, undefined, 2));
+  for (let i = 0; i < slugData.generativeTokens.length; i++) {
+    // Check if event action id has already been seen
+    if (RECENTLY_SEEN[slugData.generativeTokens[i].slug] == slugData.generativeTokens[i].actions[0].id) {
+      continue;
+    } else {
+      RECENTLY_SEEN[slugData.generativeTokens[i].slug] = slugData.generativeTokens[i].actions[0].id;
+    }
+  }
 }
 
 getAllLatestEvents().catch((error) => console.error(error));
