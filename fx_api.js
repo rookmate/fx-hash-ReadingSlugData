@@ -23,9 +23,19 @@ const formattedOutput = {
   amount: 1,
 };
 
-var TRACKED_TEZOS_ADDRESSES = {}; // (address -> bool)
-var TRACKED_TEZOS_SLUGS = {};     // (slugName -> bool)
+// Add Tezos addresses intended to track
+var TRACKED_TEZOS_ADDRESSES = {   // (address -> bool)
+    "KT1DLyJBi9pZwA6G8kpzhgbV363SD99MPW9F": true, //Sample wallet
+    "tz1RxSyMGct8LBV7z6AkxwtGdzUkeKYp3eBy": true, //Sample wallet
+}
+// Add Tezos collection slugs intended to track
+var TRACKED_TEZOS_SLUGS = {       // (slugName -> bool)
+    "departure-within-shattered-windmills": true, //Sample collection
+    "mythologic": true,                           //Sample collection
+};
+// List of events already tracked so we don't monitor it twice
 var RECENTLY_SEEN = {};           // (slugName -> action id)
+// Events to be parsed externally
 var eventsToEvaluate = [];
 
 async function getAllLatestEvents() {
