@@ -1,28 +1,5 @@
 const { GraphQLClient, gql } = require('graphql-request');
 
-const formattedOutput = {
-  id: 0,
-  collectionName: null,
-  collectionSlug: null,
-  price: null,
-  symbol: "XTZ",
-  imageUrl: null,
-  permalink: null,
-  tokenId: null,
-  rarity: null,
-  traits: [],
-  contractAddress: null,
-  site: "fx(hash)",
-  fromName: null,
-  fromAddress: null,
-  toName: null,
-  toAddress: null,
-  txHash: null,
-  type: null,
-  isPrivate: false,
-  amount: 1,
-};
-
 // Add Tezos addresses intended to track
 var TRACKED_TEZOS_ADDRESSES = {   // (address -> bool)
     "KT1DLyJBi9pZwA6G8kpzhgbV363SD99MPW9F": true, //Sample wallet
@@ -37,6 +14,31 @@ var TRACKED_TEZOS_SLUGS = {       // (slugName -> bool)
 var RECENTLY_SEEN = {};           // (slugName -> action id)
 // Events to be parsed externally
 var eventsToEvaluate = [];
+
+function formattedOutput() {
+  return {
+    id: 0,
+    collectionName: null,
+    collectionSlug: null,
+    price: null,
+    symbol: "XTZ",
+    imageUrl: null,
+    permalink: null,
+    tokenId: null,
+    rarity: null,
+    traits: [],
+    contractAddress: null,
+    site: "fx(hash)",
+    fromName: null,
+    fromAddress: null,
+    toName: null,
+    toAddress: null,
+    txHash: null,
+    type: null,
+    isPrivate: false,
+    amount: 1,
+  };
+};
 
 async function getAllLatestEvents() {
   const endpoint = 'https://api.fxhash.xyz/graphql';
@@ -97,7 +99,7 @@ async function getAllLatestEvents() {
   };
 
   const slugData = await graphQLClient.request(collectionQuery, variables);
-  console.log(JSON.stringify(slugData, undefined, 2));
+  //console.log(JSON.stringify(slugData, undefined, 2));
 
   for (let i = 0; i < slugData.generativeTokens.length; i++) {
     // Check if event action id has already been seen
@@ -116,7 +118,7 @@ async function getAllLatestEvents() {
       if (TRACKED_TEZOS_SLUGS[slugData.generativeTokens[i].slug] ||
           TRACKED_TEZOS_ADDRESSES[slugData.generativeTokens[i].actions[0].issuer.id]) {
 
-        let event = formattedOutput;
+        var event = formattedOutput();
         // Fill generic data
         event.id = slugData.generativeTokens[i].id;
         event.collectionSlug = slugData.generativeTokens[i].slug;
