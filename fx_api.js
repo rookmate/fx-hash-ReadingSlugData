@@ -97,51 +97,57 @@ async function getAllLatestEvents() {
   };
 
   const slugData = await graphQLClient.request(collectionQuery, variables);
-  //console.log(JSON.stringify(slugData, undefined, 2));
+  console.log(JSON.stringify(slugData, undefined, 2));
 
   for (let i = 0; i < slugData.generativeTokens.length; i++) {
     // Check if event action id has already been seen
     if (RECENTLY_SEEN[slugData.generativeTokens[i].slug] == slugData.generativeTokens[i].actions[0].id) {
       continue;
     } else {
-      //console.log(JSON.stringify(slugData.generativeTokens[i], undefined, 2));
+      // Register event as event seen
       RECENTLY_SEEN[slugData.generativeTokens[i].slug] = slugData.generativeTokens[i].actions[0].id;
-      let event = formattedOutput;
-      // Fill generic data
-      event.id = slugData.generativeTokens[i].id;
-      event.collectionSlug = slugData.generativeTokens[i].slug;
-      event.collectionName = slugData.generativeTokens[i].name;
-      event.txHash = slugData.generativeTokens[i].actions[0].opHash;
-      event.type = slugData.generativeTokens[i].actions[0].type;
-      event.fromName = slugData.generativeTokens[i].actions[0].issuer.name;
-      event.fromAddress = slugData.generativeTokens[i].actions[0].issuer.id;
-      event.price = Number.parseFloat(slugData.generativeTokens[i].actions[0].numericValue / (10 ** 6)).toFixed(3);
-      if (slugData.generativeTokens[i].actions[0].target != null) {
-        event.toName = slugData.generativeTokens[i].actions[0].target.name;
-        event.toAddress = slugData.generativeTokens[i].actions[0].target.id;
-      }
 
-      const token = slugData.generativeTokens[i].actions[0].objkt;
-      if (token == null) {
-        // If collection mint
-        event.imageUrl = `${gateway}${slugData.generativeTokens[i].displayUri.replace("ipfs://", "")}`;
-        event.permalink = `${collectionPermalink}${event.collectionSlug}`;
-        event.amount = slugData.generativeTokens[i].supply;
-      } else {
-        // If Object exists
-        event.tokenId = token.id;
-        event.imageUrl = `${gateway}${token.displayUri.replace("ipfs://", "")}`;
-        event.permalink = `${tokenPermalink}${token.slug}`;
-        event.rarity = token.rarity;
-        event.traits = token.features;
-        // If there is an active listing, update price math
-        if (token.activeListing != null) {
-          event.price = Number.parseFloat(token.activeListing.price / (10 ** 6)).toFixed(3);
+      // If is a collectionslug or an address we want to track, then fill event
+      if (TRACKED_TEZOS_SLUGS[slugData.generativeTokens[i].slug] ||
+          TRACKED_TEZOS_ADDRESSES[slugData.generativeTokens[i].actions[0].issuer.id]) {
+
+        let event = formattedOutput;
+        // Fill generic data
+        event.id = slugData.generativeTokens[i].id;
+        event.collectionSlug = slugData.generativeTokens[i].slug;
+        event.collectionName = slugData.generativeTokens[i].name;
+        event.txHash = slugData.generativeTokens[i].actions[0].opHash;
+        event.type = slugData.generativeTokens[i].actions[0].type;
+        event.fromName = slugData.generativeTokens[i].actions[0].issuer.name;
+        event.fromAddress = slugData.generativeTokens[i].actions[0].issuer.id;
+        event.price = Number.parseFloat(slugData.generativeTokens[i].actions[0].numericValue / (10 ** 6)).toFixed(3);
+        if (slugData.generativeTokens[i].actions[0].target != null) {
+          event.toName = slugData.generativeTokens[i].actions[0].target.name;
+          event.toAddress = slugData.generativeTokens[i].actions[0].target.id;
         }
-      }
 
-      //console.log(event);
-      eventsToEvaluate.push(event);
+        const token = slugData.generativeTokens[i].actions[0].objkt;
+        if (token == null) {
+          // If event type is MINT (collection mint) it has less data available
+          event.imageUrl = `${gateway}${slugData.generativeTokens[i].displayUri.replace("ipfs://", "")}`;
+          event.permalink = `${collectionPermalink}${event.collectionSlug}`;
+          event.amount = slugData.generativeTokens[i].supply;
+        } else {
+          // If Object exists, register token data
+          event.tokenId = token.id;
+          event.imageUrl = `${gateway}${token.displayUri.replace("ipfs://", "")}`;
+          event.permalink = `${tokenPermalink}${token.slug}`;
+          event.rarity = token.rarity;
+          event.traits = token.features;
+          // If there is an active listing, update price
+          if (token.activeListing != null) {
+            event.price = Number.parseFloat(token.activeListing.price / (10 ** 6)).toFixed(3);
+          }
+        }
+
+        //console.log(event);
+        eventsToEvaluate.push(event);
+      }
     }
   }
 
