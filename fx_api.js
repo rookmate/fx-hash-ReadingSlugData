@@ -107,6 +107,11 @@ async function getAllLatestEvents() {
       // Register event as event seen
       RECENTLY_SEEN[slugData.generativeTokens[i].slug] = slugData.generativeTokens[i].actions[0].id;
 
+      // If there is no event type we want to track
+      if (slugData.generativeTokens[i].actions[0] == null) {
+        continue;
+      }
+
       // If is a collectionslug or an address we want to track, then fill event
       if (TRACKED_TEZOS_SLUGS[slugData.generativeTokens[i].slug] ||
           TRACKED_TEZOS_ADDRESSES[slugData.generativeTokens[i].actions[0].issuer.id]) {
