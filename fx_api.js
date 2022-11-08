@@ -26,7 +26,7 @@ const formattedOutput = {
 // Add Tezos addresses intended to track
 var TRACKED_TEZOS_ADDRESSES = {   // (address -> bool)
     "KT1DLyJBi9pZwA6G8kpzhgbV363SD99MPW9F": true, //Sample wallet
-    "tz1RxSyMGct8LBV7z6AkxwtGdzUkeKYp3eBy": true, //Sample wallet
+    "tz1MM5YFX2m75KE3cmjRBNGFLkgZjF9H6KMP": true, //Sample wallet
 }
 // Add Tezos collection slugs intended to track
 var TRACKED_TEZOS_SLUGS = {       // (slugName -> bool)
