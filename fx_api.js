@@ -56,6 +56,9 @@ async function getAllLatestEvents() {
         id
         displayUri
         supply
+        marketStats {
+          floor
+        }
         actions(take: $take, filters: $filters) {
           id
           issuer {
